@@ -1,23 +1,78 @@
-import { fetchPromise } from '../helpers/fetchPromise'
+import axios from 'axios';
 
-class API {
-    constructor( server ) {
-        this.server = server
+export default class API {
+    
+    constructor( baseUrl, headers={} ) {
+        this.baseUrl = baseUrl;
+        this.headers = headers;
     }
 
-    async makeCall( ep ) {
+    // get requests
+    async get( resource ) {
         try {
-            let path = this.createTarget( ep )
-            let res = await fetchPromise( path )
-            return res.data.data
-        } catch (error) {
-            console.log( error )
+            
+            const response = await axios( 
+                { 
+                    url     : `${this.baseUrl}/${resource}`, 
+                    headers : this.headers, 
+                    method  : 'get' 
+                } 
+            )
+
+            return response
+
+        } catch ( error ) {
+
+            console.error( 'class_api', error )
+            
+            let err = {
+                message : error.message,
+                code : error.code
+            }
+
+            if ( error.response ) {
+                err.status = error.response.status;
+                err.statusText = error.response.data.message;
+            }
+
+            throw( err )
         }
     }
 
-    createTarget( ep ) {
-        return 'http://' + this.server + '/' + ep
-    }
-}
+    // post requests
+    //async post( resource, body, options ) {}
 
-export { API }
+    // put requests
+    async put( resource, body, options=false ) {
+        try {
+            
+            const response = await axios( 
+                { 
+                    url     : `${this.baseUrl}/${resource}`, 
+                    headers : this.headers,
+                    data    : body,
+                    method  : 'put' 
+                } 
+            )
+
+            return response
+
+        } catch ( error ) {
+
+            console.error( 'class_api', error )
+            
+            let err = {
+                message : error.message,
+                code : error.code
+            }
+
+            if ( error.response ) {
+                err.status = error.response.status;
+                err.statusText = error.response.statusText;
+            }
+
+            throw( err )
+        }
+    }
+
+}
